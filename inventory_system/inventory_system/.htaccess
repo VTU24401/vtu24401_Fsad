@@ -1,0 +1,21 @@
+# Minimal .htaccess for testing
+Options -Indexes
+
+# Prevent access to sensitive files
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "^(config|includes|database)\.php$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "\.(log|sql|bak|backup|old)$">
+    Require all denied
+</FilesMatch>
+
+# URL Rewriting
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /inventory_system/
+</IfModule>
