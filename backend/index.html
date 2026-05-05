@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Email + Chat Demo</title>
+</head>
+<body>
+
+  <h2>Email Send Demo</h2>
+  <button onclick="sendEmail()">Send Email</button>
+
+  <hr>
+
+  <h2>Live Chat Demo</h2>
+
+  <div id="chatBox" style="border:1px solid black; height:150px; overflow:auto; padding:5px;"></div>
+  <br>
+
+  <input id="chatInput" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
+
+  <!-- Socket.IO -->
+  <script src="http://127.0.0.1:3001/socket.io/socket.io.js"></script>
+
+  <script>
+    // ================= EMAIL =================
+    function sendEmail() {
+      fetch("http://127.0.0.1:3001/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          to: "recipient@example.com",
+          subject: "Job application received",
+          text: "Hello, your application was received."
+        })
+      })
+      .then(res => res.json())
+      .then(() => {
+        alert("Email sent successfully");
+      })
+      .catch(() => alert("Failed"));
+    }
+
+    // ================= CHAT =================
+    const socket = io("http://127.0.0.1:3001");
+
+    const roomId = "demo-room";
+
+    // join room
+    socket.on("connect", () => {
+      socket.emit("join-room", roomId);
+    });
+
+    function sendMessage() {
+      const input = document.getElementById("chatInput");
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      socket.emit("send-message", {
+        roomId,
+        message
+      });
+
+      input.value = "";
+    }
+
+    // receive message (CLEAN OUTPUT)
+    socket.on("receive-message", (data) => {
+      const chatBox = document.getElementById("chatBox");
+
+      const msg = document.createElement("div");
+      msg.innerText = data.message;   // ✅ ONLY message (fix)
+
+      chatBox.appendChild(msg);
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+  </script>
+
+</body>
+</html>
